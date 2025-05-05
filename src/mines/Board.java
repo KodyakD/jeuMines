@@ -10,11 +10,10 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-
 public class Board extends JPanel {
-	private static final long serialVersionUID = 6195235521361212179L;
-	
-	private final int NUM_IMAGES = 13;
+    private static final long serialVersionUID = 6195235521361212179L;
+
+    private final int NUM_IMAGES = 13;
     private final int CELL_SIZE = 15;
 
     private final int COVER_FOR_CELL = 10;
@@ -33,23 +32,28 @@ public class Board extends JPanel {
     private boolean inGame;
     private int mines_left;
     private Image[] img;
-    private int mines = 40;
-    private int rows = 16;
-    private int cols = 16;
+    private int mines;
+    private int rows;
+    private int cols;
     private int all_cells;
     private JLabel statusbar;
-
+    private Difficulty difficulty;
 
     public Board(JLabel statusbar) {
+        this(statusbar, Difficulty.INTERMEDIATE); // Default to intermediate
+    }
 
+    public Board(JLabel statusbar, Difficulty difficulty) {
         this.statusbar = statusbar;
+        this.difficulty = difficulty;
+        this.cols = difficulty.getCols();
+        this.rows = difficulty.getRows();
+        this.mines = difficulty.getMines();
 
         img = new Image[NUM_IMAGES];
 
         for (int i = 0; i < NUM_IMAGES; i++) {
-			img[i] =
-                    (new ImageIcon(getClass().getClassLoader().getResource((i)
-            			    + ".gif"))).getImage();
+            img[i] = (new ImageIcon(getClass().getClassLoader().getResource((i) + ".gif"))).getImage();
         }
 
         setDoubleBuffered(true);
@@ -58,6 +62,13 @@ public class Board extends JPanel {
         newGame();
     }
 
+    public void setDifficulty(Difficulty difficulty) {
+        this.difficulty = difficulty;
+        this.cols = difficulty.getCols();
+        this.rows = difficulty.getRows();
+        this.mines = difficulty.getMines();
+        newGame();
+    }
 
     public void newGame() {
 
@@ -74,12 +85,11 @@ public class Board extends JPanel {
 
         all_cells = rows * cols;
         field = new int[all_cells];
-        
+
         for (i = 0; i < all_cells; i++)
             field[i] = COVER_FOR_CELL;
 
         statusbar.setText(Integer.toString(mines_left));
-
 
         i = 0;
         while (i < mines) {
@@ -89,12 +99,11 @@ public class Board extends JPanel {
             if ((position < all_cells) &&
                 (field[position] != COVERED_MINE_CELL)) {
 
-
                 current_col = position % cols;
                 field[position] = COVERED_MINE_CELL;
                 i++;
 
-                if (current_col > 0) { 
+                if (current_col > 0) {
                     cell = position - 1 - cols;
                     if (cell >= 0)
                         if (field[cell] != COVERED_MINE_CELL)
@@ -137,13 +146,12 @@ public class Board extends JPanel {
         }
     }
 
-
     public void find_empty_cells(int j) {
 
         int current_col = j % cols;
         int cell;
 
-        if (current_col > 0) { 
+        if (current_col > 0) {
             cell = j - cols - 1;
             if (cell >= 0)
                 if (field[cell] > MINE_CELL) {
@@ -218,7 +226,6 @@ public class Board extends JPanel {
         int cell = 0;
         int uncover = 0;
 
-
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
 
@@ -238,7 +245,6 @@ public class Board extends JPanel {
                         cell = DRAW_COVER;
                     }
 
-
                 } else {
                     if (cell > COVERED_MINE_CELL)
                         cell = DRAW_MARK;
@@ -253,14 +259,12 @@ public class Board extends JPanel {
             }
         }
 
-
         if (uncover == 0 && inGame) {
             inGame = false;
             statusbar.setText("Game won");
         } else if (!inGame)
             statusbar.setText("Game lost");
     }
-
 
     class MinesAdapter extends MouseAdapter {
         public void mousePressed(MouseEvent e) {
@@ -273,12 +277,10 @@ public class Board extends JPanel {
 
             boolean rep = false;
 
-
             if (!inGame) {
                 newGame();
                 repaint();
             }
-
 
             if ((x < cols * CELL_SIZE) && (y < rows * CELL_SIZE)) {
 
